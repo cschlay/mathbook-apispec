@@ -1,0 +1,498 @@
+openapi: 3.1.0
+info:
+  title: Mathbook
+  version: '1.0'
+  description: Mathbook is an exercise and grinding platform for advanced computer science mathematics.
+  summary: The api description for mathbook.
+  contact:
+    name: Chi-Hao Lay
+servers:
+  - url: 'http://localhost:8000'
+    description: Development
+paths:
+  /math:
+    post:
+      summary: Query Formal Mathematics
+      operationId: post-math
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                description: ''
+                x-examples:
+                  example-1:
+                    data:
+                      theorems:
+                        CompletenessTheorem1:
+                          name: Completeness Theorem
+                          content: 'Let $\Gamma$ be a set of sentences. If $\Gamma$ is consistent, it is satisfiable.'
+                          proof: 'Suppose $\Gamma$ is consistent. By [LindenbaumsLemma], there is $\Gamma*  \supseteq \Gamma$'
+                          notations:
+                            - id: \Gamma* \supseteq \Gamma
+                              description: $\Gamma*$ is superset of \Gamma
+                              definition: superset
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      theorems:
+                        minProperties: 0
+                        type: object
+                        additionalProperties:
+                          $ref: '#/components/schemas/Theorem'
+                        readOnly: true
+                      definitions:
+                        type: object
+                        readOnly: true
+                      corollaries:
+                        type: object
+                    readOnly: true
+                required:
+                  - data
+                readOnly: true
+              examples:
+                Theorem:
+                  value:
+                    data:
+                      theorems:
+                        completenessTheorem1:
+                          name: Completeness Theorem
+                          content: 'Let $\Gamma$ be a set of sentences. If $\Gamma$ is consistent, it is satisfiable.'
+                          proof: 'Suppose $\Gamma$ is consistent. By [LindenbaumsLemma], there is $\Gamma*  \supseteq \Gamma$'
+                          notations:
+                            - id: \Gamma* \supseteq \Gamma
+                              description: $\Gamma*$ is superset of \Gamma
+                              definition: superset
+                          reference:
+                            name: Open Logic Project
+                            availableAt: 'https://openlogicproject.org/'
+          headers: {}
+      description: 'Query multiple definitions, theorems, corollaries at once.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              description: ''
+              type: object
+              x-examples:
+                example-1:
+                  data:
+                    theorems:
+                      CompletenessTheorem1:
+                        name: Completeness Theorem
+                        content: 'Let $\Gamma$ be a set of sentences. If $\Gamma$ is consistent, it is satisfiable.'
+                        proof: 'Suppose $\Gamma$ is consistent. By [LindenbaumsLemma], there is $\Gamma*  \supseteq \Gamma$'
+                        notations:
+                          - id: \Gamma* \supseteq \Gamma
+                            description: $\Gamma*$ is superset of \Gamma
+                            definition: superset
+              properties:
+                theorems:
+                  type: array
+                  items:
+                    type: string
+                definitions:
+                  type: array
+                  items:
+                    type: string
+                corollaries:
+                  type: array
+                  items:
+                    type: string
+            examples:
+              Theorem:
+                value:
+                  theorems:
+                    - CompletenessTheorem1
+        description: Send the query with as many theorem as required. There is a cap for about 100.
+      security: []
+      tags:
+        - Mathematics
+  '/problems/{slug}':
+    parameters:
+      - schema:
+          type: string
+        name: slug
+        in: path
+        required: true
+        description: The slug of the problem
+    get:
+      summary: Your GET endpoint
+      tags:
+        - Mathematics
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                x-examples:
+                  example-1:
+                    data:
+                      slug: pythagoras-theorem
+                      description: 'Let $a = 3$, $b = 4$, calculate $c$.'
+                      difficulty: 1
+                      solvedAt: '2017-04-16T04:07:46'
+                properties:
+                  data:
+                    type: object
+                    required:
+                      - slug
+                      - description
+                      - difficulty
+                    properties:
+                      slug:
+                        type: string
+                        minLength: 1
+                      description:
+                        type: string
+                        minLength: 1
+                      difficulty:
+                        type: number
+                      solvedAt:
+                        type:
+                          - string
+                          - 'null'
+                        minLength: 1
+                        format: date-time
+                        example: '2017-04-16T04:07:46'
+                      type:
+                        type: string
+                        enum:
+                          - multiple-choice
+                          - text-input
+                          - code
+                      choices:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            content:
+                              type: string
+                required:
+                  - data
+              examples:
+                Unsolved:
+                  value:
+                    data:
+                      slug: pythagoras-theorem
+                      description: 'Let $a = 3$, $b = 4$, calculate $c$.'
+                      difficulty: 3
+                      solvedAt: null
+                      type: text-input
+                Solved:
+                  value:
+                    data:
+                      slug: pythagoras-theorem
+                      description: 'Let $a = 3$, $b = 4$, calculate $c$.'
+                      difficulty: 1
+                      solvedAt: '2017-04-16T04:07:46'
+                      type: text-input
+                MultipleChoice:
+                  value:
+                    data:
+                      slug: which-formulas-solve-fff
+                      description: Which of the formula solves the problem?
+                      choices:
+                        - content: $x + 1 = y$
+                          submit:
+                            - a
+                            - b
+                        - content: $f(x) - 1 = y$
+                      difficulty: 2
+                      solvedAt: '2017-04-16T04:07:46'
+                      type: multiple-choice
+                EqualSet:
+                  value:
+                    data:
+                      slug: equal-sets
+                      description: Select all equal sets
+                      difficulty: 0
+                      solvedAt: '2017-04-16T04:07:46'
+                      type: multiple-choice
+                      choices:
+                        - content: 'A =\{ a, b \}'
+                          submit:
+                            - a
+                            - b
+                        - content: 'B = \{ b, a \}'
+                          submit:
+                            - b
+                            - a
+                        - content: 'C = \{ c, a\}'
+                          submit:
+                            - c
+                            - a
+      operationId: get-problems-id
+      description: Get an instance of a problem associated with id. It will not regenerate until solved.
+    post:
+      summary: ''
+      operationId: post-problems-slug
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type:
+                      - string
+                      - object
+                    properties:
+                      points:
+                        type: object
+                        properties:
+                          amount:
+                            type: integer
+                          max:
+                            type: integer
+                      summary:
+                        type: string
+                      tests:
+                        type: array
+                        items:
+                          type: object
+                          properties:
+                            id:
+                              type:
+                                - string
+                                - number
+                            description:
+                              type: string
+                            passed:
+                              type: boolean
+              examples:
+                Failed:
+                  value:
+                    data:
+                      correct: false
+                      points:
+                        amount: 0
+                        max: 1
+                      summary: 'The solution was partially correct, you have missed one case.'
+                      tests:
+                        - id: 1
+                          description: Asserting structure
+                          passed: false
+                        - id: 2
+                          description: Should have more than three elements.
+                          passed: true
+                Passed:
+                  value:
+                    data:
+                      correct: true
+                      points:
+                        amount: 1
+                        max: 1
+                      summary: 'Good job! Could also have been $a = 3, b = 2$.'
+                      tests:
+                        - id: 1
+                          description: Asserting structure
+                          passed: true
+                        - id: 2
+                          description: Should have more than three elements.
+                          passed: true
+                EqualSet:
+                  value:
+                    data:
+                      points:
+                        amount: 1
+                        max: 1
+                      summary: 'Good job! Could also have been $a = 3, b = 2$.'
+                      tests:
+                        - id: 1
+                          description: Asserting structure
+                          passed: true
+                        - id: 2
+                          description: Should have more than three elements.
+                          passed: true
+      description: 'Submit a solution, the actual structure depends on the exercise.'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                solution:
+                  type: object
+                  properties:
+                    input:
+                      type: string
+                    choices:
+                      type: array
+                      items:
+                        type: string
+                    code:
+                      type: string
+            examples:
+              TextInput:
+                value:
+                  solution:
+                    input: '{ 1, 2, 3, 4 }'
+              MultipleChoice:
+                value:
+                  solution:
+                    choices:
+                      - a
+                      - c
+              Code:
+                value:
+                  solution:
+                    code: |-
+                      def hello():
+                          print('world')
+        description: 'The final format depends on exercise, but the examples listed shows different type of exercises.'
+  /chapters:
+    get:
+      summary: Chapters
+      tags: []
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                description: ''
+                type: object
+                properties:
+                  data:
+                    type: array
+                    uniqueItems: true
+                    minItems: 1
+                    items:
+                      required:
+                        - title
+                      properties:
+                        title:
+                          type: string
+                          minLength: 1
+                        status:
+                          type: object
+                          properties:
+                            solved:
+                              type: number
+                            problems:
+                              type: number
+                            percent:
+                              type: number
+                          required:
+                            - solved
+                            - problems
+                            - percent
+                        sections:
+                          type: array
+                          uniqueItems: true
+                          minItems: 1
+                          items:
+                            required:
+                              - title
+                            properties:
+                              title:
+                                type: string
+                                minLength: 1
+                required:
+                  - data
+                x-examples:
+                  example-1:
+                    data:
+                      - title: Functions
+                        status:
+                          solved: 10
+                          problems: 35
+                          percent: 28.57
+                        sections:
+                          - title: Functions as Relations
+              examples:
+                SimpleListing:
+                  value:
+                    data:
+                      - title: Functions
+                        status:
+                          solved: 10
+                          problems: 35
+                          percent: 28.57
+                        sections:
+                          - title: Functions as Relations
+      operationId: get-chapters
+      description: 'Retrieve chapters related to a book, this is mostly to retrieve progress and might not follow the book exactly.'
+      parameters:
+        - schema:
+            type: array
+          in: query
+          name: book
+          description: 'The name of the book, these are well defined.'
+    parameters: []
+components:
+  schemas:
+    Theorem:
+      description: ''
+      type: object
+      x-examples:
+        example-1:
+          name: Function
+          content: "A function $f: A \to B$ is a mapping of each..."
+          symbols:
+            - id: \pi
+              description: a constant 'pi' which is about 3.14....
+              definition: dfn_1850
+          reference:
+            name: Open Logic Project
+            availableAt: 'https://openlogicproject.org/'
+      properties:
+        name:
+          type: string
+          minLength: 1
+        content:
+          type: string
+          minLength: 1
+        notations:
+          type: array
+          uniqueItems: true
+          minItems: 1
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+                minLength: 1
+              description:
+                type: string
+                minLength: 1
+              definition:
+                type: string
+                minLength: 1
+            required:
+              - id
+              - description
+              - definition
+        reference:
+          type: object
+          required:
+            - name
+          properties:
+            name:
+              type: string
+              minLength: 1
+            availableAt:
+              type: string
+              minLength: 1
+      required:
+        - name
+        - content
+        - notations
+        - reference
+  securitySchemes:
+    Bearer:
+      name: Authorization
+      type: apiKey
+      in: header
+  responses: {}
+security:
+  - Bearer: []
