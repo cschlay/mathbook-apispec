@@ -348,6 +348,14 @@ paths:
                     code: |-
                       def hello():
                           print('world')
+              EqualSet:
+                value:
+                  solution:
+                    choices:
+                      - - a
+                        - b
+                      - - b
+                        - a
         description: 'The final format depends on exercise, but the examples listed shows different type of exercises.'
   /chapters:
     get:
